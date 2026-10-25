@@ -5,6 +5,18 @@ header('Content-Type: application/json');
 require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
+require_once "../includes/bitacora.php";
+
+// Datos legibles de un usuario de clínica para la bitácora (clínica y rol por nombre)
+function fotoUsuarioClinica(PDO $db, $id) {
+    $stmt = $db->prepare("SELECT u.nombre, u.usuario, u.email, c.nombre_clinica AS clinica, r.nombre_rol AS rol
+        FROM usuarios_clinicas u
+        LEFT JOIN clientes_clinicas c ON u.clinica_id = c.id
+        LEFT JOIN roles_clinicas r ON u.rol_id = r.id
+        WHERE u.id = :id");
+    $stmt->execute([":id" => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
 
 // Solo personal del panel con sesión iniciada (admin o superadmin)
 verificarSesion(ROLES_PANEL, true);
@@ -65,6 +77,8 @@ try {
         $stmt->execute([":usr" => $usuario, ":id" => $id ?? 0]);
         if ($stmt->fetchColumn()) errorValidacion("Ya existe un usuario activo con ese nombre de usuario");
 
+        $antes = $id !== null ? fotoUsuarioClinica($db, $id) : null;
+
         if ($id !== null) {
             $sql = "UPDATE usuarios_clinicas SET clinica_id=:idC, nombre=:nom, usuario=:usr, email=:ema, rol_id=:rol_id WHERE id=:id";
             if(!empty($pass)){
@@ -81,11 +95,20 @@ try {
         }
 
         foreach($params as $k => $v) $stmt->bindValue($k, $v);
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Error al guardar"]);
+        $stmt->execute();
+
+        $idGuardado = $id ?? (int)$db->lastInsertId();
+        $despues = fotoUsuarioClinica($db, $idGuardado);
+        $cambios = cambiosEntre($antes, $despues);
+        if ($pass !== '' && $id !== null) $cambios["password"] = ["antes" => null, "despues" => "(contraseña cambiada)"];
+        $etiqueta = $despues["usuario"] . " (" . $despues["clinica"] . ")";
+        if ($id === null) {
+            registrarBitacora($db, "crear", "usuario_clinica", $idGuardado, "Creó el usuario de clínica $etiqueta", $cambios);
+        } elseif ($cambios) {
+            registrarBitacora($db, "editar", "usuario_clinica", $idGuardado, "Editó el usuario de clínica $etiqueta", $cambios);
         }
+
+        echo json_encode(["status" => "success"]);
         exit;
     }
 

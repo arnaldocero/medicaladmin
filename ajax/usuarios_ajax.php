@@ -9,8 +9,16 @@ header('Content-Type: application/json');
 require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
+require_once "../includes/bitacora.php";
 
 verificarSesion(["superadmin"], true);
+
+// Datos de un usuario del panel para la bitácora (sin contraseña)
+function fotoUsuarioAdmin(PDO $db, $id) {
+    $stmt = $db->prepare("SELECT nombre, email, rol FROM usuarios_admin WHERE id = :id");
+    $stmt->execute([":id" => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
 
 // true si $id es superadmin activo y no hay ningún otro superadmin activo
 function esUltimoSuperadmin(PDO $db, $id) {
@@ -58,6 +66,8 @@ try {
             errorValidacion("No se puede quitar el rol: es el único superadmin activo");
         }
 
+        $antes = $id !== null ? fotoUsuarioAdmin($db, $id) : null;
+
         if ($id !== null) {
             if ($password !== '') {
                 $stmt = $db->prepare("UPDATE usuarios_admin SET nombre=:n, email=:e, rol=:r, password=:p WHERE id=:id");
@@ -81,6 +91,16 @@ try {
             if (esDuplicado($e)) errorValidacion("Ya existe un usuario con ese email (puede estar inactivo)");
             throw $e;
         }
+
+        $idGuardado = $id ?? (int)$db->lastInsertId();
+        $cambios = cambiosEntre($antes, fotoUsuarioAdmin($db, $idGuardado));
+        if ($password !== '' && $id !== null) $cambios["password"] = ["antes" => null, "despues" => "(contraseña cambiada)"];
+        if ($id === null) {
+            registrarBitacora($db, "crear", "usuario_admin", $idGuardado, "Creó el usuario del panel $email ($rol)", $cambios);
+        } elseif ($cambios) {
+            registrarBitacora($db, "editar", "usuario_admin", $idGuardado, "Editó el usuario del panel $email", $cambios);
+        }
+
         echo json_encode(["status" => "success"]);
         exit;
     }
@@ -91,9 +111,13 @@ try {
         if ($id === (int)$_SESSION['id']) errorValidacion("No puedes eliminar tu propio usuario");
         if (esUltimoSuperadmin($db, $id)) errorValidacion("No se puede eliminar: es el único superadmin activo");
 
-        $stmt = $db->prepare("UPDATE usuarios_admin SET estado = 0 WHERE id = :id");
+        $antes = fotoUsuarioAdmin($db, $id);
+        $stmt = $db->prepare("UPDATE usuarios_admin SET estado = 0 WHERE id = :id AND estado = 1");
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+            registrarBitacora($db, "eliminar", "usuario_admin", $id, "Eliminó el usuario del panel " . ($antes["email"] ?? "#$id"), cambiosEntre($antes, null));
+        }
         echo json_encode(["status" => "success"]);
         exit;
     }

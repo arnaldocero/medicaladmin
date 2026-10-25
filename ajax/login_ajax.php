@@ -80,6 +80,9 @@ try {
     $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
     $_SESSION["ultima_actividad"] = time();
 
+    require_once "../includes/bitacora.php";
+    registrarBitacora($db, "login", "sesion", (int)$usuario["id"], "Inició sesión");
+
     echo json_encode(["status" => "success"]);
 } catch (Exception $e) {
     error_log("login_ajax: " . $e->getMessage());

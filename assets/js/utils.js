@@ -29,7 +29,7 @@ const DATATABLES_ES = {
 
 // Pinta las filas en el <tbody> y aplica DataTables (búsqueda, orden y paginación).
 // Si la tabla ya existía, conserva el texto buscado y la página actual.
-window.pintarTabla = function(selectorTbody, html) {
+window.pintarTabla = function(selectorTbody, html, opciones) {
     const $tabla = jQuery(selectorTbody).closest('table');
     let busqueda = '', pagina = 0, longitud = 10;
 
@@ -43,12 +43,12 @@ window.pintarTabla = function(selectorTbody, html) {
 
     jQuery(selectorTbody).html(html);
 
-    $tabla.css('width', '100%').DataTable({
+    $tabla.css('width', '100%').DataTable(jQuery.extend({
         language: DATATABLES_ES,
         pageLength: longitud,
         order: [],                                           // respeta el orden que envía el servidor
         columnDefs: [{ targets: -1, orderable: false, searchable: false }]  // columna de acciones
-    }).search(busqueda).page(pagina).draw('page');
+    }, opciones || {})).search(busqueda).page(pagina).draw('page');
 };
 
 // Escapa texto antes de insertarlo como HTML (evita XSS en las tablas)

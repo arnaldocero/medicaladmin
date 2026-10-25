@@ -29,6 +29,9 @@ function claseActiva($pagina) {
                 <li<?php echo claseActiva("usuarios.php"); ?>>
                     <a href="usuarios.php"> <i class="menu-icon fa fa-user-secret"></i>Personal del Panel</a>
                 </li>
+                <li<?php echo claseActiva("bitacora.php"); ?>>
+                    <a href="bitacora.php"> <i class="menu-icon fa fa-history"></i>Bitácora</a>
+                </li>
                 <?php endif; ?>
 
                 <li class="menu-title">Sesión</li>

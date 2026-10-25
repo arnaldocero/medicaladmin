@@ -6,8 +6,18 @@ header('Content-Type: application/json');
 require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
+require_once "../includes/bitacora.php";
 
 verificarSesion(["superadmin"], true);
+
+// Datos de una clínica para la bitácora
+function fotoClinica(PDO $db, $id) {
+    $stmt = $db->prepare("SELECT nit_empresa, nombre_clinica, representante_legal, telefono, email_contacto,
+            plan_contratado, fecha_activacion, fecha_vencimiento
+        FROM clientes_clinicas WHERE id = :id");
+    $stmt->execute([":id" => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
@@ -51,6 +61,8 @@ try {
             ":f_v" => $vencimiento
         ];
 
+        $antes = $id !== null ? fotoClinica($db, $id) : null;
+
         if ($id !== null) {
             // EDITAR
             $sql = "UPDATE clientes_clinicas SET nit_empresa=:nit, nombre_clinica=:nom, representante_legal=:rep,
@@ -76,6 +88,16 @@ try {
             if (esDuplicado($e)) errorValidacion("Ya existe una clínica con ese NIT (puede estar inactiva)");
             throw $e;
         }
+
+        $idGuardado = $id ?? (int)$db->lastInsertId();
+        $cambios = cambiosEntre($antes, fotoClinica($db, $idGuardado));
+        $etiqueta = $datos[":nom"] . " (NIT " . $nit . ")";
+        if ($id === null) {
+            registrarBitacora($db, "crear", "clinica", $idGuardado, "Creó la clínica $etiqueta", $cambios);
+        } elseif ($cambios) {
+            registrarBitacora($db, "editar", "clinica", $idGuardado, "Editó la clínica $etiqueta", $cambios);
+        }
+
         echo json_encode(["status" => "success"]);
         exit;
     }
@@ -91,9 +113,15 @@ try {
     if ($action == 'eliminar') {
         $id = idPost('id');
         if ($id === null) errorValidacion("Identificador no válido");
-        $stmt = $db->prepare("UPDATE clientes_clinicas SET estado = 0 WHERE id = :id");
+        $antes = fotoClinica($db, $id);
+        $stmt = $db->prepare("UPDATE clientes_clinicas SET estado = 0 WHERE id = :id AND estado = 1");
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+            registrarBitacora($db, "eliminar", "clinica", $id,
+                "Eliminó la clínica " . ($antes["nombre_clinica"] ?? "#$id") . " (NIT " . ($antes["nit_empresa"] ?? "-") . ")",
+                cambiosEntre($antes, null));
+        }
         echo json_encode(["status" => "success"]);
         exit;
     }
