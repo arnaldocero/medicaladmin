@@ -78,7 +78,7 @@
                         <div class="col-md-6 form-group"><label>Email</label><input type="email" name="email_uc" id="email_uc" class="form-control"></div>
                         <div class="col-md-6 form-group">
                             <label>Password</label>
-                            <input type="password" name="password" id="password" class="form-control">
+                            <input type="password" name="password" id="password" class="form-control" minlength="8">
                             <small class="text-muted">Vacío para mantener actual.</small>
                         </div>
                     </div>

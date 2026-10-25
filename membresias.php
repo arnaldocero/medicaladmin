@@ -84,11 +84,11 @@ include "includes/header.php";
                         </div>
                         <div class="col-md-4 form-group">
                             <label>Fecha Activación</label>
-                            <input type="date" name="fecha_activacion" id="fecha_activacion" class="form-control">
+                            <input type="date" name="fecha_activacion" id="fecha_activacion" class="form-control" required>
                         </div>
                         <div class="col-md-4 form-group">
                             <label>Fecha Vencimiento</label>
-                            <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control">
+                            <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control" required>
                         </div>
                     </div>
                 </div>

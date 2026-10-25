@@ -29,5 +29,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
-    <script src="assets/js/login.js"></script> </body>
+    <script src="assets/js/login.js?v=<?php echo filemtime(__DIR__ . "/assets/js/login.js"); ?>"></script> </body>
 </html>

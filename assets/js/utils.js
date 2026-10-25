@@ -3,6 +3,12 @@ jQuery.ajaxSetup({
     headers: { 'X-CSRF-Token': jQuery('meta[name="csrf-token"]').attr('content') || '' }
 });
 
+// Muestra el mensaje del servidor cuando una petición AJAX es rechazada (422 validación, 403 CSRF, 401...)
+jQuery(document).ajaxError(function(evento, xhr) {
+    const res = xhr.responseJSON || {};
+    Swal.fire('Error', res.message || 'Error de comunicación con el servidor', 'error');
+});
+
 // Escapa texto antes de insertarlo como HTML (evita XSS en las tablas)
 window.esc = function(valor) {
     if (valor === null || valor === undefined) return '';

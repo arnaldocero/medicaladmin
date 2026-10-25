@@ -72,7 +72,7 @@ include "includes/header.php";
                                 <label class="form-control-label">Contraseña</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><i class="fa fa-lock"></i></div>
-                                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 caracteres">
+                                    <input type="password" name="password" id="password" class="form-control" placeholder="Mín. 8 caracteres" minlength="8">
                                 </div>
                                 <small class="form-text text-muted">Si editas, deja en blanco para mantener la actual.</small>
                             </div>

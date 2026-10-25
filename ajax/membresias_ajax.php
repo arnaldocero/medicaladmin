@@ -6,6 +6,7 @@ header('Content-Type: application/json');
 session_start();
 require_once "../class/Conexion.php";
 require_once "../includes/csrf.php";
+require_once "../includes/validacion.php";
 
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
     echo json_encode(["status" => "error", "message" => "No autorizado"]);
@@ -30,30 +31,41 @@ try {
     }
 
     if ($action == 'guardar') {
-        $id = $_POST['idCliente'] ?? '';
-        
+        $id = idPost('idCliente');
+
+        $nit = textoPost('nit_empresa', 'El NIT', 20);
+        if (!preg_match('/^[0-9A-Za-z.\- ]+$/', $nit)) errorValidacion("El NIT solo admite números, letras, puntos y guiones");
+        $telefono = textoPost('telefono', 'El teléfono', 20, false);
+        if ($telefono !== '' && !preg_match('/^[0-9+\-() ]+$/', $telefono)) errorValidacion("El teléfono solo admite números, espacios y + - ( )");
+        $plan = $_POST['plan_contratado'] ?? '';
+        if (!in_array($plan, ['Basico', 'Medio', 'Alto'], true)) errorValidacion("Plan no válido");
+
+        $activacion = fechaPost('fecha_activacion', 'La fecha de activación');
+        $vencimiento = fechaPost('fecha_vencimiento', 'La fecha de vencimiento');
+        if ($vencimiento <= $activacion) errorValidacion("La fecha de vencimiento debe ser posterior a la de activación");
+
         $datos = [
-            ":nit" => $_POST['nit_empresa'],
-            ":nom" => $_POST['nombre_clinica'],
-            ":rep" => $_POST['representante_legal'],
-            ":tel" => $_POST['telefono'],
-            ":ema" => $_POST['email_contacto'],
-            ":pla" => $_POST['plan_contratado'],
-            ":f_a" => $_POST['fecha_activacion'],
-            ":f_v" => $_POST['fecha_vencimiento']
+            ":nit" => $nit,
+            ":nom" => textoPost('nombre_clinica', 'El nombre de la clínica', 200),
+            ":rep" => textoPost('representante_legal', 'El representante legal', 150, false),
+            ":tel" => $telefono,
+            ":ema" => emailPost('email_contacto', 'El email de contacto', false),
+            ":pla" => $plan,
+            ":f_a" => $activacion,
+            ":f_v" => $vencimiento
         ];
 
-        if (!empty($id)) {
+        if ($id !== null) {
             // EDITAR
-            $sql = "UPDATE clientes_clinicas SET nit_empresa=:nit, nombre_clinica=:nom, representante_legal=:rep, 
-                    telefono=:tel, email_contacto=:ema, plan_contratado=:pla, fecha_activacion=:f_a, 
+            $sql = "UPDATE clientes_clinicas SET nit_empresa=:nit, nombre_clinica=:nom, representante_legal=:rep,
+                    telefono=:tel, email_contacto=:ema, plan_contratado=:pla, fecha_activacion=:f_a,
                     fecha_vencimiento=:f_v WHERE id=:id";
             $stmt = $db->prepare($sql);
-            $stmt->bindValue(":id", $id);
+            $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         } else {
             // NUEVO
-            $sql = "INSERT INTO clientes_clinicas (nit_empresa, nombre_clinica, representante_legal, telefono, 
-                    email_contacto, plan_contratado, fecha_activacion, fecha_vencimiento, estado) 
+            $sql = "INSERT INTO clientes_clinicas (nit_empresa, nombre_clinica, representante_legal, telefono,
+                    email_contacto, plan_contratado, fecha_activacion, fecha_vencimiento, estado)
                     VALUES (:nit, :nom, :rep, :tel, :ema, :pla, :f_a, :f_v, 1)";
             $stmt = $db->prepare($sql);
         }
@@ -61,34 +73,37 @@ try {
         foreach ($datos as $key => $val) {
             $stmt->bindValue($key, $val);
         }
-        
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Error al guardar"]);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $e) {
+            if (esDuplicado($e)) errorValidacion("Ya existe una clínica con ese NIT (puede estar inactiva)");
+            throw $e;
         }
+        echo json_encode(["status" => "success"]);
         exit;
     }
 
     if ($action == 'obtener') {
-        $id = $_POST['id'];
         $stmt = $db->prepare("SELECT * FROM clientes_clinicas WHERE id = :id");
-        $stmt->bindParam(":id", $id);
+        $stmt->bindValue(":id", idPost('id'), PDO::PARAM_INT);
         $stmt->execute();
         echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
         exit;
     }
 
     if ($action == 'eliminar') {
-        $id = $_POST['id'];
+        $id = idPost('id');
+        if ($id === null) errorValidacion("Identificador no válido");
         $stmt = $db->prepare("UPDATE clientes_clinicas SET estado = 0 WHERE id = :id");
-        $stmt->bindParam(":id", $id);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
         echo json_encode(["status" => "success"]);
         exit;
     }
 
+    echo json_encode(["status" => "error", "message" => "Acción no válida"]);
 } catch (Exception $e) {
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
-    exit;
+    error_log("membresias_ajax: " . $e->getMessage());
+    echo json_encode(["status" => "error", "message" => "Error al procesar la solicitud"]);
 }

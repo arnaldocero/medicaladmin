@@ -15,9 +15,6 @@
                 } else {
                     Swal.fire('Error', res.message || 'No se pudo guardar', 'error');
                 }
-            }).fail(function(xhr) {
-                let res = xhr.responseJSON || {};
-                Swal.fire('Error', res.message || 'Error de comunicación con el servidor', 'error');
             });
         });
     });
