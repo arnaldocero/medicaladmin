@@ -27,12 +27,12 @@
             let html = '';
             data.forEach(u => {
                 html += `<tr>
-                    <td><span class="badge badge-light">${u.nombre_clinica}</span></td>
-                    <td>${u.nombre}<br><small class="text-primary">${u.usuario}</small></td>
-                    <td><span class="badge badge-dark">${u.rol}</span></td>
-                    <td>${u.email}</td>
+                    <td><span class="badge badge-light">${esc(u.nombre_clinica)}</span></td>
+                    <td>${esc(u.nombre)}<br><small class="text-primary">${esc(u.usuario)}</small></td>
+                    <td><span class="badge badge-dark">${esc(u.rol)}</span></td>
+                    <td>${esc(u.email)}</td>
                     <td class="text-center">
-                        <button class="btn btn-warning btn-sm" onclick="editarUserC(${u.id})"><i class="fa fa-edit"></i></button>
+                        <button class="btn btn-warning btn-sm" onclick="editarUserC(${Number(u.id)})"><i class="fa fa-edit"></i></button>
                     </td>
                 </tr>`;
             });

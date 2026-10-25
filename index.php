@@ -14,7 +14,7 @@
             <div class="header-menu">
                 <div class="user-area dropdown float-right">
                     <a href="#" class="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="mr-2"><?php echo $_SESSION["nombre"]; ?></span>
+                        <span class="mr-2"><?php echo htmlspecialchars($_SESSION["nombre"], ENT_QUOTES, "UTF-8"); ?></span>
                         <img class="user-avatar rounded-circle" src="images/admin.jpg" alt="User Avatar">
                     </a>
                     <div class="user-menu dropdown-menu">

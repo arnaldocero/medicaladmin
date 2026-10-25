@@ -23,13 +23,13 @@
                 usuarios.forEach(u => {
                     let badgeClass = (u.rol === 'superadmin') ? 'badge-danger' : 'badge-primary';
                     html += `<tr>
-                        <td>${u.nombre}</td>
-                        <td>${u.email}</td>
-                        <td><span class="badge ${badgeClass} px-3 py-2">${u.rol.toUpperCase()}</span></td>
+                        <td>${esc(u.nombre)}</td>
+                        <td>${esc(u.email)}</td>
+                        <td><span class="badge ${badgeClass} px-3 py-2">${esc(String(u.rol).toUpperCase())}</span></td>
                         <td class="text-center">
                             <div class="btn-group">
-                                <button class="btn btn-warning btn-sm" onclick="editarUsuario(${u.id})"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.id})"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-warning btn-sm" onclick="editarUsuario(${Number(u.id)})"><i class="fa fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${Number(u.id)})"><i class="fa fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>`;

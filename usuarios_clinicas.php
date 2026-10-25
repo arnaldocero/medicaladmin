@@ -55,7 +55,7 @@
                                 require_once "class/Conexion.php";
                                 $db = Conexion::conectar();
                                 $res = $db->query("SELECT id, nombre_clinica FROM clientes_clinicas WHERE estado = 1");
-                                while($f = $res->fetch(PDO::FETCH_ASSOC)) echo "<option value='".$f['id']."'>".$f['nombre_clinica']."</option>";
+                                while($f = $res->fetch(PDO::FETCH_ASSOC)) echo "<option value='".(int)$f['id']."'>".htmlspecialchars($f['nombre_clinica'], ENT_QUOTES, 'UTF-8')."</option>";
                                 ?>
                             </select>
                         </div>
@@ -65,7 +65,7 @@
                                 <option value="">Seleccione Rol...</option>
                                 <?php
                                 $resR = $db->query("SELECT id, nombre_rol FROM roles_clinicas");
-                                while($r = $resR->fetch(PDO::FETCH_ASSOC)) echo "<option value='".$r['id']."'>".$r['nombre_rol']."</option>";
+                                while($r = $resR->fetch(PDO::FETCH_ASSOC)) echo "<option value='".(int)$r['id']."'>".htmlspecialchars($r['nombre_rol'], ENT_QUOTES, 'UTF-8')."</option>";
                                 ?>
                             </select>
                         </div>

@@ -38,14 +38,14 @@
             data.forEach(c => {
                 let badgePlan = (c.plan_contratado == 'Alto') ? 'badge-danger' : (c.plan_contratado == 'Medio' ? 'badge-warning' : 'badge-info');
                 html += `<tr>
-                    <td><b>${c.nit_empresa}</b><br>${c.nombre_clinica}</td>
-                    <td>${c.representante_legal}</td>
-                    <td><span class="badge ${badgePlan}">${c.plan_contratado}</span></td>
-                    <td><small>Vence: ${c.fecha_vencimiento}</small></td>
+                    <td><b>${esc(c.nit_empresa)}</b><br>${esc(c.nombre_clinica)}</td>
+                    <td>${esc(c.representante_legal)}</td>
+                    <td><span class="badge ${badgePlan}">${esc(c.plan_contratado)}</span></td>
+                    <td><small>Vence: ${esc(c.fecha_vencimiento)}</small></td>
                     <td class="text-center">
                         <div class="btn-group">
-                            <button class="btn btn-warning btn-sm" onclick="editarClinica(${c.id})"><i class="fa fa-edit"></i></button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarClinica(${c.id})"><i class="fa fa-trash"></i></button>
+                            <button class="btn btn-warning btn-sm" onclick="editarClinica(${Number(c.id)})"><i class="fa fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarClinica(${Number(c.id)})"><i class="fa fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>`;
