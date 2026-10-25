@@ -12,11 +12,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-match-height@0.7.2/dist/jquery.matchHeight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="assets/js/main.js"></script>
-<script src="assets/js/utils.js"></script>
-<script src="assets/js/usuarios.js"></script>
-<script src="assets/js/membresias.js"></script>
-<script src="assets/js/usuarios_clinicas.js?v=<?php echo time(); ?>"></script>
+<?php
+// Scripts propios: los comunes y solo el de la página actual ($paginaJs).
+// ?v= cambia cuando se modifica el archivo, para que el navegador no use una copia vieja.
+$scriptsJs = ["main.js", "utils.js"];
+if (!empty($paginaJs)) $scriptsJs[] = $paginaJs;
+foreach ($scriptsJs as $js) {
+    $ruta = "assets/js/" . $js;
+    echo '<script src="' . $ruta . '?v=' . @filemtime(__DIR__ . "/../" . $ruta) . '"></script>' . "\n";
+}
+?>
 
 </body>
 </html>

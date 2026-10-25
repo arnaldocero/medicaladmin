@@ -4,6 +4,7 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json');
 session_start();
 require_once "../class/Conexion.php";
+require_once "../includes/csrf.php";
 
 // Solo personal del panel con sesión iniciada
 if (!isset($_SESSION["validar"]) || $_SESSION["validar"] !== "ok"
@@ -14,6 +15,11 @@ if (!isset($_SESSION["validar"]) || $_SESSION["validar"] !== "ok"
 }
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// Todo lo que no sea listar modifica o lee datos concretos: solo por POST con token CSRF
+if ($action !== 'listar_global') {
+    verificarCsrf();
+}
 try {
     $db = Conexion::conectar();
 

@@ -5,6 +5,17 @@ if(!isset($_SESSION["validar"]) || $_SESSION["validar"] != "ok"){
     header("location: login.php");
     exit();
 }
+
+// Páginas restringidas: definen $rolRequerido antes de incluir este archivo
+if (!empty($rolRequerido) && ($_SESSION["rol"] ?? '') !== $rolRequerido) {
+    header("location: index.php");
+    exit();
+}
+
+// Token CSRF de la sesión: utils.js lo envía en cada petición AJAX
+if (empty($_SESSION["csrf_token"])) {
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+}
 ?>
 <!doctype html>
 <html class="no-js" lang="es">
@@ -13,6 +24,7 @@ if(!isset($_SESSION["validar"]) || $_SESSION["validar"] != "ok"){
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Administrador - Clínica</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="<?php echo $_SESSION["csrf_token"]; ?>">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.0/normalize.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">

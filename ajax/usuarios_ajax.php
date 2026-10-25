@@ -5,6 +5,7 @@ ini_set('display_errors', 0);
 
 session_start();
 require_once "../class/Conexion.php";
+require_once "../includes/csrf.php";
 
 // Encabezado obligatorio para JSON
 header('Content-Type: application/json');
@@ -15,6 +16,11 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
 }
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// Todo lo que no sea listar modifica o lee datos concretos: solo por POST con token CSRF
+if ($action !== 'listar') {
+    verificarCsrf();
+}
 
 try {
     $db = Conexion::conectar();

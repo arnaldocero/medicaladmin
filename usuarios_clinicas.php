@@ -91,4 +91,7 @@
         </div>
     </div>
 </div>
-<?php include "includes/footer.php"; ?>
+<?php
+$paginaJs = "usuarios_clinicas.js";
+include "includes/footer.php";
+?>

@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 
 session_start();
 require_once "../class/Conexion.php";
+require_once "../includes/csrf.php";
 
 if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
     echo json_encode(["status" => "error", "message" => "No autorizado"]);
@@ -12,6 +13,11 @@ if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
 }
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// Todo lo que no sea listar modifica o lee datos concretos: solo por POST con token CSRF
+if ($action !== 'listar') {
+    verificarCsrf();
+}
 
 try {
     $db = Conexion::conectar();

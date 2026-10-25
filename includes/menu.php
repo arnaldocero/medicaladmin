@@ -7,9 +7,11 @@
                 </li>
                 
                 <li class="menu-title">Gestión de Clientes</li>
+                <?php if($_SESSION["rol"] == "superadmin"): ?>
                 <li>
                     <a href="membresias.php"> <i class="menu-icon fa fa-id-card"></i>Membresías / Clínicas</a>
                 </li>
+                <?php endif; ?>
                 <li>
                     <a href="usuarios_clinicas.php"> <i class="menu-icon fa fa-users"></i>Usuarios Hospitalarios</a>
                 </li>

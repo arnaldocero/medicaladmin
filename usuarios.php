@@ -1,12 +1,8 @@
-<?php include "includes/header.php"; ?>
-<?php include "includes/menu.php"; ?>
-
 <?php
-if($_SESSION["rol"] !== "superadmin"){
-    header("Location: index.php");
-    exit();
-}
+$rolRequerido = "superadmin";
+include "includes/header.php";
 ?>
+<?php include "includes/menu.php"; ?>
 
 <div id="right-panel" class="right-panel">
     <div class="content">
@@ -107,4 +103,7 @@ if($_SESSION["rol"] !== "superadmin"){
     </div>
 </div>
 
-<?php include "includes/footer.php"; ?>
+<?php
+$paginaJs = "usuarios.js";
+include "includes/footer.php";
+?>

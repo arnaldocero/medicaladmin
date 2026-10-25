@@ -1,4 +1,7 @@
-<?php include "includes/header.php"; ?>
+<?php
+$rolRequerido = "superadmin";
+include "includes/header.php";
+?>
 <?php include "includes/menu.php"; ?>
 
 <div id="right-panel" class="right-panel">
@@ -98,4 +101,7 @@
     </div>
 </div>
 
-<?php include "includes/footer.php"; ?>
+<?php
+$paginaJs = "membresias.js";
+include "includes/footer.php";
+?>
