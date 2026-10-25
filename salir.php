@@ -1,4 +1,4 @@
 <?php
-session_start();
-session_destroy();
+require_once "includes/sesion.php";
+cerrarSesion();
 header("location: login.php");

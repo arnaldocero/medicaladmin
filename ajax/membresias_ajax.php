@@ -3,15 +3,11 @@ error_reporting(0);
 ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-session_start();
-require_once "../class/Conexion.php";
+require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
 
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
-    echo json_encode(["status" => "error", "message" => "No autorizado"]);
-    exit;
-}
+verificarSesion(["superadmin"], true);
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 

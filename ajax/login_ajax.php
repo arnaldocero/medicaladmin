@@ -3,11 +3,8 @@ error_reporting(0);
 ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-// Cookie de sesión más segura: se aplica a la cookie nueva que se emite al iniciar sesión
-$https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
-session_start();
-require_once "../class/Conexion.php";
+require_once "../includes/sesion.php";
+iniciarSesion();
 
 // Límites contra fuerza bruta
 const MAX_FALLOS_EMAIL = 5;   // por email en la ventana
@@ -81,6 +78,7 @@ try {
     $_SESSION["nombre"] = $usuario["nombre"];
     $_SESSION["rol"] = $usuario["rol"];
     $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+    $_SESSION["ultima_actividad"] = time();
 
     echo json_encode(["status" => "success"]);
 } catch (Exception $e) {

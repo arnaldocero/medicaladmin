@@ -3,17 +3,24 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 
-session_start();
-require_once "../class/Conexion.php";
-require_once "../includes/csrf.php";
-require_once "../includes/validacion.php";
-
 // Encabezado obligatorio para JSON
 header('Content-Type: application/json');
 
-if(!isset($_SESSION["rol"]) || $_SESSION["rol"] !== "superadmin"){
-    echo json_encode(["status" => "error", "message" => "No tienes permisos"]);
-    exit;
+require_once "../includes/sesion.php";
+require_once "../includes/csrf.php";
+require_once "../includes/validacion.php";
+
+verificarSesion(["superadmin"], true);
+
+// true si $id es superadmin activo y no hay ningún otro superadmin activo
+function esUltimoSuperadmin(PDO $db, $id) {
+    $stmt = $db->prepare("SELECT
+            SUM(id = :id) AS es_super,
+            COUNT(*) AS total
+        FROM usuarios_admin WHERE rol = 'superadmin' AND estado = 1");
+    $stmt->execute([":id" => $id]);
+    $r = $stmt->fetch(PDO::FETCH_ASSOC);
+    return (int)$r["es_super"] === 1 && (int)$r["total"] <= 1;
 }
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
@@ -44,6 +51,11 @@ try {
         // Un superadmin no puede quitarse a sí mismo el rol (se quedaría sin acceso)
         if ($id === (int)$_SESSION['id'] && $rol !== 'superadmin') {
             errorValidacion("No puedes quitarte tu propio rol de superadmin");
+        }
+
+        // Quitarle el rol al último superadmin activo dejaría el panel sin nadie que lo administre
+        if ($id !== null && $rol !== 'superadmin' && esUltimoSuperadmin($db, $id)) {
+            errorValidacion("No se puede quitar el rol: es el único superadmin activo");
         }
 
         if ($id !== null) {
@@ -77,6 +89,7 @@ try {
         $id = idPost('id');
         if ($id === null) errorValidacion("Identificador no válido");
         if ($id === (int)$_SESSION['id']) errorValidacion("No puedes eliminar tu propio usuario");
+        if (esUltimoSuperadmin($db, $id)) errorValidacion("No se puede eliminar: es el único superadmin activo");
 
         $stmt = $db->prepare("UPDATE usuarios_admin SET estado = 0 WHERE id = :id");
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);

@@ -2,18 +2,12 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 header('Content-Type: application/json');
-session_start();
-require_once "../class/Conexion.php";
+require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
 
-// Solo personal del panel con sesión iniciada
-if (!isset($_SESSION["validar"]) || $_SESSION["validar"] !== "ok"
-    || !in_array($_SESSION["rol"] ?? '', ["superadmin", "admin"], true)) {
-    http_response_code(401);
-    echo json_encode(["status" => "error", "message" => "No autorizado"]);
-    exit;
-}
+// Solo personal del panel con sesión iniciada (admin o superadmin)
+verificarSesion(ROLES_PANEL, true);
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 

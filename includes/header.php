@@ -1,21 +1,7 @@
-<?php 
-session_start(); 
-// Si la variable de sesión 'validar' no existe o no es 'ok', lo mandamos al login
-if(!isset($_SESSION["validar"]) || $_SESSION["validar"] != "ok"){
-    header("location: login.php");
-    exit();
-}
-
-// Páginas restringidas: definen $rolRequerido antes de incluir este archivo
-if (!empty($rolRequerido) && ($_SESSION["rol"] ?? '') !== $rolRequerido) {
-    header("location: index.php");
-    exit();
-}
-
-// Token CSRF de la sesión: utils.js lo envía en cada petición AJAX
-if (empty($_SESSION["csrf_token"])) {
-    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
-}
+<?php
+// Sesión válida, no inactiva y con usuario activo; las páginas restringidas definen $rolRequerido antes
+require_once __DIR__ . "/sesion.php";
+verificarSesion(!empty($rolRequerido) ? [$rolRequerido] : ROLES_PANEL);
 ?>
 <!doctype html>
 <html class="no-js" lang="es">

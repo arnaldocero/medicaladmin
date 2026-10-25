@@ -12,6 +12,15 @@
         <div class="container">
             <div class="login-content">
                 <div class="login-form">
+                    <?php
+                    // Aviso cuando verificarSesion() cerró la sesión
+                    $avisos = [
+                        "inactividad" => "Tu sesión se cerró por inactividad. Inicia sesión de nuevo.",
+                        "desactivado" => "Tu usuario fue desactivado. Contacta a un superadmin.",
+                    ];
+                    if (isset($avisos[$_GET["motivo"] ?? ""])): ?>
+                    <div class="alert alert-warning"><?php echo $avisos[$_GET["motivo"]]; ?></div>
+                    <?php endif; ?>
                     <form id="formLogin">
                         <div class="form-group">
                             <label>Correo Electrónico</label>

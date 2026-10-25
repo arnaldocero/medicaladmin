@@ -6,6 +6,12 @@ jQuery.ajaxSetup({
 // Muestra el mensaje del servidor cuando una petición AJAX es rechazada (422 validación, 403 CSRF, 401...)
 jQuery(document).ajaxError(function(evento, xhr) {
     const res = xhr.responseJSON || {};
+    // 401 = la sesión terminó (inactividad o usuario desactivado): volver al login
+    if (xhr.status === 401) {
+        const motivo = res.sesion && res.sesion !== 'sin_sesion' ? '?motivo=' + encodeURIComponent(res.sesion) : '';
+        window.location.href = 'login.php' + motivo;
+        return;
+    }
     Swal.fire('Error', res.message || 'Error de comunicación con el servidor', 'error');
 });
 
