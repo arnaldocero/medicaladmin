@@ -50,7 +50,7 @@
                     </td>
                 </tr>`;
             });
-            $("#tablaClinicas").html(html);
+            pintarTabla("#tablaClinicas", html);
         });
     }
 

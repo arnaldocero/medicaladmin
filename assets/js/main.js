@@ -76,15 +76,16 @@ jQuery(document).ready(function($) {
 
 
 	// Load Resize 
-	$(window).on("load resize", function(event) { 
+	// Con jQuery 3 el ready es asíncrono y puede llegar después de "load": se ejecuta también al inicio
+	$(window).on("resize", function(event) { 
 		var windowWidth = $(window).width();  		 
 		if (windowWidth<1010) {
 			$('body').addClass('small-device'); 
 		} else {
-			$('body').removeClass('small-device');  
-		} 
-		
-	});
+			$('body').removeClass('small-device');
+		}
+
+	}).trigger("resize");
   
  
 });

@@ -33,7 +33,7 @@
                     </td>
                 </tr>`;
             });
-            $("#tbodyUsuariosClinicas").html(html);
+            pintarTabla("#tbodyUsuariosClinicas", html);
         });
     }
 

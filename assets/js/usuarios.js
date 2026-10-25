@@ -34,7 +34,7 @@
                         </td>
                     </tr>`;
                 });
-                $("#tablaUsuarios").html(html);
+                pintarTabla("#tablaUsuarios", html);
             } catch (e) { 
                 console.error("Error al renderizar la tabla:", e); 
             }
