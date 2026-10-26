@@ -45,6 +45,11 @@ window.pintarTabla = function(selectorTbody, html, opciones) {
 
     const tabla = $tabla.css('width', '100%').DataTable(jQuery.extend({
         language: DATATABLES_ES,
+        // Distribución de Bootstrap 4, pero con la tabla en .table-responsive: en el móvil
+        // la tabla se desplaza sola en horizontal en vez de ensanchar toda la página
+        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+             "<'table-responsive'tr>" +
+             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         pageLength: longitud,
         order: [],                                           // respeta el orden que envía el servidor
         columnDefs: [{ targets: -1, orderable: false, searchable: false }]  // columna de acciones

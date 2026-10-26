@@ -9,6 +9,7 @@ $planes = obtenerPlanes(Conexion::conectar());
 ?>
 
 <div id="right-panel" class="right-panel">
+<?php include "includes/barra_superior.php"; ?>
     <div class="content">
         <div class="animated fadeIn">
             <div class="row">

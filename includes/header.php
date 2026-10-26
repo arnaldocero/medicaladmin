@@ -21,12 +21,17 @@ verificarSesion(!empty($rolRequerido) ? [$rolRequerido] : ROLES_PANEL);
     <link rel="stylesheet" href="assets/css/style.css">
 
     <style>
-        #weatherWidget .currentDesc { color: #ffffff!important; }
-        .traffic-chart { min-height: 335px; }
-        #flotPie1 { height: 150px; }
-        #flotPie1 td { padding:3px; }
-        #flotPie1 table { top: 20px!important; right: -10px!important; }
-        .chart-container { display: table; min-width: 270px; text-align: left; padding-top: 10px; padding-bottom: 10px; }
+        /* Las columnas flex no se encogen por debajo del ancho de una tabla ancha y ensanchan
+           toda la página en el móvil; con min-width 0 la tabla se desplaza dentro de .table-responsive */
+        .row > [class*="col"] { min-width: 0; }
+        /* La plantilla pone body { display: table }, que crece hasta el ancho de su contenido:
+           en pantallas pequeñas una tabla ancha estiraba toda la página fuera de la pantalla */
+        @media (max-width: 991px) { body { display: block; } }
+
+        /* Menú del usuario en la barra superior (la plantilla fija 150px de ancho y line-height 55px) */
+        .user-area .user-menu { min-width: 220px; line-height: 1.4; }
+        .user-area .user-menu .dropdown-item-text { padding: 8px 12px; white-space: normal; }
+        .user-area .user-menu .nav-link { line-height: 1.4; padding: 8px 12px; }
     </style>
 </head>
 <body>
