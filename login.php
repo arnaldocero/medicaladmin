@@ -2,6 +2,7 @@
 <html class="no-js" lang="es">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login | Administrador de Membresías</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -30,7 +31,8 @@
                             <label>Contraseña</label>
                             <input type="password" id="password" class="form-control" placeholder="Password" required>
                         </div>
-                        <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-30">Entrar</button>
+                        <button type="submit" class="btn btn-success btn-flat m-t-30">Entrar</button>
+                        <div class="text-right mt-2 mb-3"><a href="recuperar.php" class="small">¿Olvidaste tu contraseña?</a></div>
                     </form>
                 </div>
             </div>

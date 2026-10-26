@@ -3,14 +3,15 @@
 
 // Guarda una acción. Si la tabla no existe o falla, la operación principal sigue
 // adelante: el error solo queda en el log del servidor.
-function registrarBitacora(PDO $db, $accion, $entidad, $entidadId, $descripcion, ?array $cambios = null) {
+// $autor: ["id" => .., "nombre" => ..] cuando no hay sesión (recuperación de contraseña, cron).
+function registrarBitacora(PDO $db, $accion, $entidad, $entidadId, $descripcion, ?array $cambios = null, ?array $autor = null) {
     try {
         $stmt = $db->prepare("INSERT INTO bitacora_admin
                 (usuario_id, usuario_nombre, accion, entidad, entidad_id, descripcion, cambios, ip)
                 VALUES (:uid, :unom, :acc, :ent, :eid, :des, :cam, :ip)");
         $stmt->execute([
-            ":uid"  => $_SESSION["id"] ?? null,
-            ":unom" => $_SESSION["nombre"] ?? null,
+            ":uid"  => $autor ? ($autor["id"] ?? null) : ($_SESSION["id"] ?? null),
+            ":unom" => $autor ? ($autor["nombre"] ?? null) : ($_SESSION["nombre"] ?? null),
             ":acc"  => $accion,
             ":ent"  => $entidad,
             ":eid"  => $entidadId,

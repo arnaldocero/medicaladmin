@@ -44,7 +44,7 @@
                     </td>
                 </tr>`;
             });
-            pintarTabla("#tbodyUsuariosClinicas", html);
+            pintarTabla("#tbodyUsuariosClinicas", html, { exportar: { archivo: "usuarios_clinicas", titulo: "Usuarios de clínicas", sinUltimaColumna: true } });
         });
     }
 

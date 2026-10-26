@@ -31,6 +31,11 @@ sql/         Scripts de cambios en la base de datos
    En el servidor usar `'debug' => false`.
 2. Ejecutar en la base de datos los scripts de `sql/` que aún no se hayan aplicado.
 3. En el servidor, bloquear `.git` y `config.php` con `.htaccess`.
+4. Correo (recuperación de contraseña y avisos): en `config.php` definir `url_base`,
+   `correo_modo` (`mail` en el servidor, `archivo` en local → se guardan en `logs/correos/`)
+   y `correo_remitente` (una cuenta del mismo dominio).
+5. Avisos de vencimiento: en cPanel → Cron Jobs, una vez al día:
+   `php /home/USUARIO/public_html/HMSadmin/cron/avisos_vencimiento.php`
 
 ## Flujo de trabajo
 

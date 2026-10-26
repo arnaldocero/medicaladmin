@@ -65,7 +65,7 @@
                     </td>
                 </tr>`;
             });
-            pintarTabla("#tablaClinicas", html);
+            pintarTabla("#tablaClinicas", html, { exportar: { archivo: "clinicas", titulo: "Clínicas", sinUltimaColumna: true } });
         });
     }
 

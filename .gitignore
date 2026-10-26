@@ -1,3 +1,7 @@
 # Credenciales por entorno (local / servidor)
-config.php
+/config.php
 .env
+
+# Correos guardados en local y otros registros (pueden contener enlaces de recuperación)
+logs/*
+!logs/.htaccess

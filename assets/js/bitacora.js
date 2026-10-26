@@ -54,7 +54,8 @@
             });
             pintarTabla("#tablaBitacora", html, {
                 pageLength: 25,
-                columnDefs: [{ targets: -1, orderable: false }]   // los cambios sí se pueden buscar
+                columnDefs: [{ targets: -1, orderable: false }],   // los cambios sí se pueden buscar
+                exportar: { archivo: "bitacora", titulo: "Bitácora de cambios" }
             });
 
             const aviso = $("#avisoLimite");

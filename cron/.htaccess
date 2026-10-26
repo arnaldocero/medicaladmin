@@ -1,0 +1,2 @@
+# Los scripts de cron solo se ejecutan desde la línea de comandos
+Require all denied
