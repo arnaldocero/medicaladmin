@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) DEFAULT NULL,           -- usuarios_admin.id de quien hizo la acción
   `usuario_nombre` varchar(100) DEFAULT NULL,  -- copia del nombre, por si el usuario se modifica después
-  `accion` varchar(20) NOT NULL,               -- crear | editar | eliminar | login
+  `accion` varchar(20) NOT NULL,               -- crear | editar | eliminar | desactivar | activar | login
   `entidad` varchar(30) NOT NULL,              -- clinica | usuario_clinica | usuario_admin | sesion
   `entidad_id` int(11) DEFAULT NULL,
   `descripcion` varchar(255) NOT NULL,

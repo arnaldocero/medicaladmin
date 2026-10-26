@@ -31,14 +31,65 @@ try {
     $db = Conexion::conectar();
 
     if ($action == 'listar_global') {
-        $sql = "SELECT u.id, u.nombre, u.usuario, u.email, r.nombre_rol as rol, c.nombre_clinica
+        // Filtros opcionales: clinica_id y estado (1 = activos [por defecto], 0 = inactivos, todos)
+        $where = [];
+        $params = [];
+        $estado = $_GET['estado'] ?? '1';
+        if ($estado === '1' || $estado === '0') {
+            $where[] = "u.estado = :estado";
+            $params[":estado"] = (int)$estado;
+        }
+        if (ctype_digit((string)($_GET['clinica_id'] ?? ''))) {
+            $where[] = "u.clinica_id = :clinica";
+            $params[":clinica"] = (int)$_GET['clinica_id'];
+        }
+
+        $sql = "SELECT u.id, u.nombre, u.usuario, u.email, u.estado, r.nombre_rol as rol,
+                       c.nombre_clinica, c.estado AS clinica_estado
                 FROM usuarios_clinicas u
                 INNER JOIN roles_clinicas r ON u.rol_id = r.id
-                INNER JOIN clientes_clinicas c ON u.clinica_id = c.id
-                WHERE u.estado = 1 ORDER BY c.nombre_clinica ASC";
+                INNER JOIN clientes_clinicas c ON u.clinica_id = c.id"
+             . ($where ? " WHERE " . implode(" AND ", $where) : "")
+             . " ORDER BY c.nombre_clinica ASC, u.nombre ASC";
         $stmt = $db->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        exit;
+    }
+
+    // Desactivar / reactivar. No se borra el registro: el usuario tiene citas,
+    // historias clínicas, fórmulas, etc. asociadas que deben conservarse.
+    if ($action == 'cambiar_estado') {
+        $id = idPost('id');
+        if ($id === null) errorValidacion("Identificador no válido");
+        $nuevo = $_POST['estado'] ?? '';
+        if ($nuevo !== '0' && $nuevo !== '1') errorValidacion("Estado no válido");
+        $nuevo = (int)$nuevo;
+
+        $stmt = $db->prepare("SELECT u.usuario, u.estado, u.clinica_id, c.estado AS clinica_estado
+            FROM usuarios_clinicas u INNER JOIN clientes_clinicas c ON u.clinica_id = c.id WHERE u.id = :id");
+        $stmt->execute([":id" => $id]);
+        $actual = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$actual) errorValidacion("El usuario no existe");
+
+        if ($nuevo === 1) {
+            if (!(int)$actual["clinica_estado"]) errorValidacion("No se puede reactivar: la clínica del usuario está inactiva");
+            // Mientras estuvo inactivo, otro usuario activo pudo tomar el mismo nombre de usuario
+            $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios_clinicas WHERE usuario = :usr AND estado = 1 AND id <> :id");
+            $stmt->execute([":usr" => $actual["usuario"], ":id" => $id]);
+            if ($stmt->fetchColumn()) errorValidacion("No se puede reactivar: ya hay otro usuario activo llamado " . $actual["usuario"]);
+        }
+
+        $stmt = $db->prepare("UPDATE usuarios_clinicas SET estado = :nuevo WHERE id = :id AND estado <> :nuevo2");
+        $stmt->execute([":nuevo" => $nuevo, ":id" => $id, ":nuevo2" => $nuevo]);
+        if ($stmt->rowCount() > 0) {
+            $foto = fotoUsuarioClinica($db, $id);
+            $etiqueta = $foto["usuario"] . " (" . $foto["clinica"] . ")";
+            registrarBitacora($db, $nuevo ? "activar" : "desactivar", "usuario_clinica", $id,
+                ($nuevo ? "Reactivó" : "Desactivó") . " el usuario de clínica $etiqueta",
+                ["estado" => ["antes" => $nuevo ? "Inactivo" : "Activo", "despues" => $nuevo ? "Activo" : "Inactivo"]]);
+        }
+        echo json_encode(["status" => "success"]);
         exit;
     }
 

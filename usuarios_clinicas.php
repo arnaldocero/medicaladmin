@@ -1,5 +1,11 @@
 <?php include "includes/header.php"; ?>
 <?php include "includes/menu.php"; ?>
+<?php
+// Todas las clínicas (también inactivas) para el filtro de la tabla
+$clinicasFiltro = Conexion::conectar()
+    ->query("SELECT id, nombre_clinica, estado FROM clientes_clinicas ORDER BY nombre_clinica")
+    ->fetchAll(PDO::FETCH_ASSOC);
+?>
 
 <div id="right-panel" class="right-panel">
     <div class="content">
@@ -14,6 +20,25 @@
                             </button>
                         </div>
                         <div class="card-body">
+                            <div class="form-row mb-3">
+                                <div class="col-sm-6 col-lg-4">
+                                    <label for="filtroClinica" class="small mb-1">Clínica</label>
+                                    <select id="filtroClinica" class="form-control form-control-sm">
+                                        <option value="">Todas las clínicas</option>
+                                        <?php foreach ($clinicasFiltro as $c): ?>
+                                        <option value="<?php echo (int)$c["id"]; ?>"><?php echo htmlspecialchars($c["nombre_clinica"], ENT_QUOTES, "UTF-8") . ($c["estado"] ? "" : " (inactiva)"); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <label for="filtroEstado" class="small mb-1">Estado</label>
+                                    <select id="filtroEstado" class="form-control form-control-sm">
+                                        <option value="1">Activos</option>
+                                        <option value="0">Inactivos</option>
+                                        <option value="todos">Todos</option>
+                                    </select>
+                                </div>
+                            </div>
                             <table class="table table-striped table-bordered">
                                 <thead class="thead-dark">
                                     <tr>
@@ -21,6 +46,7 @@
                                         <th>Nombre / Usuario</th>
                                         <th>Rol</th>
                                         <th>Email</th>
+                                        <th>Estado</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>

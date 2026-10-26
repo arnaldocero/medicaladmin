@@ -43,12 +43,15 @@ window.pintarTabla = function(selectorTbody, html, opciones) {
 
     jQuery(selectorTbody).html(html);
 
-    $tabla.css('width', '100%').DataTable(jQuery.extend({
+    const tabla = $tabla.css('width', '100%').DataTable(jQuery.extend({
         language: DATATABLES_ES,
         pageLength: longitud,
         order: [],                                           // respeta el orden que envía el servidor
         columnDefs: [{ targets: -1, orderable: false, searchable: false }]  // columna de acciones
-    }, opciones || {})).search(busqueda).page(pagina).draw('page');
+    }, opciones || {})).search(busqueda).draw();
+
+    // Vuelve a la página en la que estaba, si todavía existe con los datos nuevos
+    if (pagina > 0 && pagina < tabla.page.info().pages) tabla.page(pagina).draw('page');
 };
 
 // Escapa texto antes de insertarlo como HTML (evita XSS en las tablas)

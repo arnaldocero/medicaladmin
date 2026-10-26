@@ -6,6 +6,8 @@
         crear:    ['Creó', 'badge-success'],
         editar:   ['Editó', 'badge-warning'],
         eliminar: ['Eliminó', 'badge-danger'],
+        desactivar: ['Desactivó', 'badge-secondary'],
+        activar:  ['Reactivó', 'badge-primary'],
         login:    ['Inicio de sesión', 'badge-info']
     };
     const CAMPOS = {
@@ -13,7 +15,7 @@
         telefono: 'Teléfono', email_contacto: 'Email de contacto', plan_contratado: 'Plan',
         fecha_activacion: 'Activación', fecha_vencimiento: 'Vencimiento',
         nombre: 'Nombre', usuario: 'Usuario', email: 'Email', rol: 'Rol', clinica: 'Clínica',
-        password: 'Contraseña'
+        password: 'Contraseña', estado: 'Estado'
     };
 
     $(document).ready(function() {

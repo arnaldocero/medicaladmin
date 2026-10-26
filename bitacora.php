@@ -58,6 +58,8 @@ $usuariosFiltro = Conexion::conectar()
                                         <option value="crear">Crear</option>
                                         <option value="editar">Editar</option>
                                         <option value="eliminar">Eliminar</option>
+                                        <option value="desactivar">Desactivar</option>
+                                        <option value="activar">Reactivar</option>
                                         <option value="login">Inicio de sesión</option>
                                     </select>
                                 </div>

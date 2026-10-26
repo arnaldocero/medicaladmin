@@ -33,7 +33,7 @@ try {
             $where[] = "b.entidad = :entidad";
             $params[":entidad"] = $_GET['entidad'];
         }
-        if (in_array($_GET['accion_filtro'] ?? '', ['crear', 'editar', 'eliminar', 'login'], true)) {
+        if (in_array($_GET['accion_filtro'] ?? '', ['crear', 'editar', 'eliminar', 'desactivar', 'activar', 'login'], true)) {
             $where[] = "b.accion = :accion";
             $params[":accion"] = $_GET['accion_filtro'];
         }
