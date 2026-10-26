@@ -22,6 +22,16 @@ $planes = obtenerPlanes(Conexion::conectar());
                             </button>
                         </div>
                         <div class="card-body">
+                            <div class="form-row mb-3">
+                                <div class="col-sm-6 col-lg-3">
+                                    <label for="filtroEstadoClinica" class="small mb-1">Estado</label>
+                                    <select id="filtroEstadoClinica" class="form-control form-control-sm">
+                                        <option value="1">Activas</option>
+                                        <option value="0">Inactivas</option>
+                                        <option value="todas">Todas</option>
+                                    </select>
+                                </div>
+                            </div>
                             <table class="table table-striped table-bordered">
                                 <thead class="thead-dark">
                                     <tr>

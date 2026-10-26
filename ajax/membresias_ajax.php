@@ -31,12 +31,16 @@ try {
     $db = Conexion::conectar();
 
     if ($action == 'listar') {
+        // Filtro de estado: 1 = activas (por defecto), 0 = inactivas, todas
+        $estado = $_GET['estado'] ?? '1';
+        $where = ($estado === '1' || $estado === '0') ? "WHERE c.estado = " . (int)$estado : "";
+
         // Con el nombre del plan, su límite y los usuarios activos de cada clínica
         $stmt = $db->prepare("SELECT c.*, p.nombre AS plan_nombre, p.max_usuarios,
                 (SELECT COUNT(*) FROM usuarios_clinicas u WHERE u.clinica_id = c.id AND u.estado = 1) AS usuarios_activos
             FROM clientes_clinicas c
             LEFT JOIN planes p ON p.codigo = c.plan_contratado
-            WHERE c.estado = 1 ORDER BY c.id DESC");
+            $where ORDER BY c.estado DESC, c.id DESC");
         $stmt->execute();
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         exit;
@@ -130,19 +134,33 @@ try {
         exit;
     }
 
-    if ($action == 'eliminar') {
+    // Desactivar / reactivar. La clínica nunca se borra: sus usuarios, pacientes,
+    // historias clínicas, facturas, etc. dependen de ella.
+    if ($action == 'cambiar_estado') {
         $id = idPost('id');
         if ($id === null) errorValidacion("Identificador no válido");
+        $nuevo = $_POST['estado'] ?? '';
+        if ($nuevo !== '0' && $nuevo !== '1') errorValidacion("Estado no válido");
+        $nuevo = (int)$nuevo;
+
         $antes = fotoClinica($db, $id);
-        $stmt = $db->prepare("UPDATE clientes_clinicas SET estado = 0 WHERE id = :id AND estado = 1");
-        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        $stmt->execute();
+        if (!$antes) errorValidacion("La clínica no existe");
+
+        $stmt = $db->prepare("UPDATE clientes_clinicas SET estado = :nuevo WHERE id = :id AND estado <> :nuevo2");
+        $stmt->execute([":nuevo" => $nuevo, ":id" => $id, ":nuevo2" => $nuevo]);
         if ($stmt->rowCount() > 0) {
-            registrarBitacora($db, "eliminar", "clinica", $id,
-                "Eliminó la clínica " . ($antes["nombre_clinica"] ?? "#$id") . " (NIT " . ($antes["nit_empresa"] ?? "-") . ")",
-                cambiosEntre($antes, null));
+            registrarBitacora($db, $nuevo ? "activar" : "desactivar", "clinica", $id,
+                ($nuevo ? "Reactivó" : "Desactivó") . " la clínica " . $antes["nombre_clinica"] . " (NIT " . $antes["nit_empresa"] . ")",
+                ["estado" => ["antes" => $nuevo ? "Inactiva" : "Activa", "despues" => $nuevo ? "Activa" : "Inactiva"]]);
         }
-        echo json_encode(["status" => "success"]);
+
+        // Al reactivar se avisa si la membresía ya venció
+        $aviso = null;
+        if ($nuevo === 1 && $antes["fecha_vencimiento"] < $db->query("SELECT CURDATE()")->fetchColumn()) {
+            $aviso = "La clínica está activa de nuevo, pero su membresía venció el " . $antes["fecha_vencimiento"]
+                   . ". Edítala para renovar la fecha de vencimiento.";
+        }
+        echo json_encode(["status" => "success", "aviso" => $aviso]);
         exit;
     }
 
