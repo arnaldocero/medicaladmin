@@ -1,13 +1,16 @@
 <?php
 // Avisos por email de membresías por vencer. Se ejecuta una vez al día desde el Cron de cPanel:
-//   php /home/USUARIO/public_html/HMSadmin/cron/avisos_vencimiento.php
+//   php -q /home/USUARIO/public_html/HMSadmin/cron/avisos_vencimiento.php >> .../logs/avisos.log 2>&1
+//   (-q evita que PHP-CGI escriba cabeceras HTTP en la salida)
 //
 // - Umbrales en config.php → 'avisos_dias' (por defecto 30, 15, 7, 1 y 0 días antes).
 // - Cada aviso se envía una sola vez por clínica, fecha de vencimiento y umbral (tabla avisos_vencimiento).
 //   Si el cron no corrió algún día, en la siguiente ejecución se envía el umbral que corresponda.
 // - Siempre: un resumen a los superadmins activos. Si 'avisos_a_clinicas' es true, también a cada clínica.
 
-if (php_sapi_name() !== 'cli') {
+// Solo desde el cron / línea de comandos. En muchos cPanel el "php" del cron es PHP-CGI (no CLI),
+// así que no basta con mirar php_sapi_name(): una petición web siempre trae REQUEST_METHOD.
+if (isset($_SERVER['REQUEST_METHOD']) || isset($_SERVER['REMOTE_ADDR'])) {
     http_response_code(404);
     exit;
 }

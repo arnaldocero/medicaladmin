@@ -35,7 +35,7 @@ sql/         Scripts de cambios en la base de datos
    `correo_modo` (`mail` en el servidor, `archivo` en local → se guardan en `logs/correos/`)
    y `correo_remitente` (una cuenta del mismo dominio).
 5. Avisos de vencimiento: en cPanel → Cron Jobs, una vez al día:
-   `php /home/USUARIO/public_html/HMSadmin/cron/avisos_vencimiento.php`
+   `php -q /home/USUARIO/public_html/HMSadmin/cron/avisos_vencimiento.php >> /home/USUARIO/public_html/HMSadmin/logs/avisos.log 2>&1`
 
 ## Flujo de trabajo
 
