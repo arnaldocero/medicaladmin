@@ -15,7 +15,8 @@
         telefono: 'Teléfono', email_contacto: 'Email de contacto', plan_contratado: 'Plan',
         fecha_activacion: 'Activación', fecha_vencimiento: 'Vencimiento',
         nombre: 'Nombre', usuario: 'Usuario', email: 'Email', rol: 'Rol', clinica: 'Clínica',
-        password: 'Contraseña', estado: 'Estado'
+        password: 'Contraseña', estado: 'Estado',
+        codigo: 'Código', precio_mensual: 'Precio mensual', max_usuarios: 'Límite de usuarios'
     };
 
     $(document).ready(function() {

@@ -7,6 +7,7 @@ require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
 require_once "../includes/bitacora.php";
+require_once "../includes/planes.php";
 
 verificarSesion(["superadmin"], true);
 
@@ -30,7 +31,12 @@ try {
     $db = Conexion::conectar();
 
     if ($action == 'listar') {
-        $stmt = $db->prepare("SELECT * FROM clientes_clinicas WHERE estado = 1 ORDER BY id DESC");
+        // Con el nombre del plan, su límite y los usuarios activos de cada clínica
+        $stmt = $db->prepare("SELECT c.*, p.nombre AS plan_nombre, p.max_usuarios,
+                (SELECT COUNT(*) FROM usuarios_clinicas u WHERE u.clinica_id = c.id AND u.estado = 1) AS usuarios_activos
+            FROM clientes_clinicas c
+            LEFT JOIN planes p ON p.codigo = c.plan_contratado
+            WHERE c.estado = 1 ORDER BY c.id DESC");
         $stmt->execute();
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         exit;
@@ -44,7 +50,8 @@ try {
         $telefono = textoPost('telefono', 'El teléfono', 20, false);
         if ($telefono !== '' && !preg_match('/^[0-9+\-() ]+$/', $telefono)) errorValidacion("El teléfono solo admite números, espacios y + - ( )");
         $plan = $_POST['plan_contratado'] ?? '';
-        if (!in_array($plan, ['Basico', 'Medio', 'Alto'], true)) errorValidacion("Plan no válido");
+        $planes = obtenerPlanes($db);
+        if (!isset($planes[$plan])) errorValidacion("Plan no válido");
 
         $activacion = fechaPost('fecha_activacion', 'La fecha de activación');
         $vencimiento = fechaPost('fecha_vencimiento', 'La fecha de vencimiento');
@@ -98,7 +105,20 @@ try {
             registrarBitacora($db, "editar", "clinica", $idGuardado, "Editó la clínica $etiqueta", $cambios);
         }
 
-        echo json_encode(["status" => "success"]);
+        // Si el nuevo plan tiene un límite menor que los usuarios activos actuales, se avisa (no se desactiva a nadie)
+        $aviso = null;
+        $max = $planes[$plan]["max_usuarios"];
+        if ($id !== null && $max !== null) {
+            $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios_clinicas WHERE clinica_id = :id AND estado = 1");
+            $stmt->execute([":id" => $idGuardado]);
+            $activos = (int)$stmt->fetchColumn();
+            if ($activos > (int)$max) {
+                $aviso = "La clínica tiene $activos usuarios activos y el plan " . $planes[$plan]["nombre"]
+                       . " permite " . (int)$max . ". No podrá crear ni reactivar usuarios hasta bajar de ese número.";
+            }
+        }
+
+        echo json_encode(["status" => "success", "aviso" => $aviso]);
         exit;
     }
 

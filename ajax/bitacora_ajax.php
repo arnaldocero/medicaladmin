@@ -29,7 +29,7 @@ try {
                 $params[":$campo"] = $fecha->format('Y-m-d');
             }
         }
-        if (in_array($_GET['entidad'] ?? '', ['clinica', 'usuario_clinica', 'usuario_admin', 'sesion'], true)) {
+        if (in_array($_GET['entidad'] ?? '', ['clinica', 'usuario_clinica', 'usuario_admin', 'plan', 'sesion'], true)) {
             $where[] = "b.entidad = :entidad";
             $params[":entidad"] = $_GET['entidad'];
         }

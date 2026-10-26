@@ -6,6 +6,7 @@ require_once "../includes/sesion.php";
 require_once "../includes/csrf.php";
 require_once "../includes/validacion.php";
 require_once "../includes/bitacora.php";
+require_once "../includes/planes.php";
 
 // Datos legibles de un usuario de clínica para la bitácora (clínica y rol por nombre)
 function fotoUsuarioClinica(PDO $db, $id) {
@@ -78,6 +79,7 @@ try {
             $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios_clinicas WHERE usuario = :usr AND estado = 1 AND id <> :id");
             $stmt->execute([":usr" => $actual["usuario"], ":id" => $id]);
             if ($stmt->fetchColumn()) errorValidacion("No se puede reactivar: ya hay otro usuario activo llamado " . $actual["usuario"]);
+            if ((int)$actual["estado"] !== 1) verificarLimiteUsuarios($db, $actual["clinica_id"], $id);
         }
 
         $stmt = $db->prepare("UPDATE usuarios_clinicas SET estado = :nuevo WHERE id = :id AND estado <> :nuevo2");
@@ -127,6 +129,18 @@ try {
         $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios_clinicas WHERE usuario = :usr AND estado = 1 AND id <> :id");
         $stmt->execute([":usr" => $usuario, ":id" => $id ?? 0]);
         if ($stmt->fetchColumn()) errorValidacion("Ya existe un usuario activo con ese nombre de usuario");
+
+        // Límite de usuarios del plan: al crear, o al mover un usuario activo a otra clínica
+        if ($id === null) {
+            verificarLimiteUsuarios($db, $clinicaId);
+        } else {
+            $stmt = $db->prepare("SELECT clinica_id, estado FROM usuarios_clinicas WHERE id = :id");
+            $stmt->execute([":id" => $id]);
+            $actualUC = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($actualUC && (int)$actualUC["estado"] === 1 && (int)$actualUC["clinica_id"] !== $clinicaId) {
+                verificarLimiteUsuarios($db, $clinicaId, $id);
+            }
+        }
 
         $antes = $id !== null ? fotoUsuarioClinica($db, $id) : null;
 

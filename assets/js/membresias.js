@@ -17,7 +17,11 @@
                 data: datos,
                 success: function(res) {
                     if (res.status === "success") {
-                        Swal.fire('¡Éxito!', 'Clínica guardada correctamente', 'success');
+                        if (res.aviso) {
+                            Swal.fire('Guardada con aviso', res.aviso, 'warning');
+                        } else {
+                            Swal.fire('¡Éxito!', 'Clínica guardada correctamente', 'success');
+                        }
                         $('#modalClinica').modal('hide');
                         listarClinicas();
                         $("#formClinica")[0].reset();
@@ -37,10 +41,18 @@
             let html = '';
             data.forEach(c => {
                 let badgePlan = (c.plan_contratado == 'Alto') ? 'badge-danger' : (c.plan_contratado == 'Medio' ? 'badge-warning' : 'badge-info');
+                // Usuarios activos frente al límite del plan; en rojo si lo supera
+                const max = c.max_usuarios === null ? null : Number(c.max_usuarios);
+                const usados = Number(c.usuarios_activos);
+                const usuarios = max === null
+                    ? `${usados} <small class="text-muted">/ sin límite</small>`
+                    : `<span class="${usados > max ? 'text-danger font-weight-bold' : (usados === max ? 'text-warning font-weight-bold' : '')}">${usados} / ${max}</span>`
+                      + (usados > max ? ' <span class="badge badge-danger">excede</span>' : '');
                 html += `<tr>
                     <td><b>${esc(c.nit_empresa)}</b><br>${esc(c.nombre_clinica)}</td>
                     <td>${esc(c.representante_legal)}</td>
-                    <td><span class="badge ${badgePlan}">${esc(c.plan_contratado)}</span></td>
+                    <td><span class="badge ${badgePlan}">${esc(c.plan_nombre || c.plan_contratado)}</span></td>
+                    <td data-order="${usados}">${usuarios}</td>
                     <td><small>Vence: ${esc(c.fecha_vencimiento)}</small></td>
                     <td class="text-center">
                         <div class="btn-group">

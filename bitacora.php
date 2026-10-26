@@ -48,6 +48,7 @@ $usuariosFiltro = Conexion::conectar()
                                         <option value="clinica">Clínicas</option>
                                         <option value="usuario_clinica">Usuarios de clínicas</option>
                                         <option value="usuario_admin">Personal del panel</option>
+                                        <option value="plan">Planes</option>
                                         <option value="sesion">Inicios de sesión</option>
                                     </select>
                                 </div>

@@ -3,6 +3,10 @@ $rolRequerido = "superadmin";
 include "includes/header.php";
 ?>
 <?php include "includes/menu.php"; ?>
+<?php
+require_once "includes/planes.php";
+$planes = obtenerPlanes(Conexion::conectar());
+?>
 
 <div id="right-panel" class="right-panel">
     <div class="content">
@@ -23,6 +27,7 @@ include "includes/header.php";
                                         <th>NIT / Clínica</th>
                                         <th>Representante</th>
                                         <th>Plan</th>
+                                        <th>Usuarios</th>
                                         <th>Vencimiento</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
@@ -77,9 +82,9 @@ include "includes/header.php";
                         <div class="col-md-4 form-group">
                             <label>Plan Contratado</label>
                             <select name="plan_contratado" id="plan_contratado" class="form-control">
-                                <option value="Basico">Básico</option>
-                                <option value="Medio">Medio</option>
-                                <option value="Alto">Alto</option>
+                                <?php foreach ($planes as $codigo => $p): ?>
+                                <option value="<?php echo htmlspecialchars($codigo, ENT_QUOTES, "UTF-8"); ?>"><?php echo htmlspecialchars($p["nombre"], ENT_QUOTES, "UTF-8") . " — " . formatoPesos($p["precio_mensual"]) . "/mes" . ($p["max_usuarios"] !== null ? " · máx. " . (int)$p["max_usuarios"] . " usuarios" : ""); ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-4 form-group">
